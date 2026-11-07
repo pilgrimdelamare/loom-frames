@@ -1,0 +1,33 @@
+name: b
+on:
+  workflow_dispatch:
+    inputs:
+      job:
+        required: true
+jobs:
+  b:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: a
+        env:
+          J: ${{ inputs.job }}
+        run: echo "::add-mask::$J"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: req.txt
+      - uses: actions/cache@v4
+        id: m
+        with:
+          path: m
+          key: m-3-2026-05-11
+      - if: steps.m.outputs.cache-hit != 'true'
+        run: mkdir -p m && curl -sL https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/sherpa-onnx-supertonic-3-tts-int8-2026-05-11.tar.bz2 | tar xj -C m
+      - run: pip install -r req.txt
+      - name: r
+        env:
+          J: ${{ inputs.job }}
+        run: python speak.py "$J"

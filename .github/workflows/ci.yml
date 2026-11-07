@@ -1,0 +1,25 @@
+name: ci
+on:
+  workflow_dispatch:
+    inputs:
+      job:
+        required: true
+jobs:
+  b:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: a
+        env:
+          J: ${{ inputs.job }}
+        run: echo "::add-mask::$J"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install playwright==1.48.0 && python -m playwright install --with-deps chromium
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - name: r
+        env:
+          J: ${{ inputs.job }}
+        run: python main.py "$J"
